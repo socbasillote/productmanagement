@@ -6,7 +6,7 @@ function ImageUpload({ value, onChange }) {
     if (!file) return;
 
     // Basic validation
-    if (!file.type.startsWith("/image")) return;
+    if (!file.type.startsWith("image/")) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -16,8 +16,13 @@ function ImageUpload({ value, onChange }) {
   };
 
   return (
-    <div>
-      <input type="file" accept="image/*" onChange={handleImageUpload} />
+    <div className="mt-4">
+      <input
+        type="file"
+        accept="image/*"
+        placeholder="Select Photo"
+        onChange={handleImageUpload}
+      />
 
       {value && (
         <div className="mt-2">

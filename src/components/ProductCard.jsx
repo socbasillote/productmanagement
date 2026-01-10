@@ -1,4 +1,8 @@
+import { useDispatch } from "react-redux";
+import { selectProduct } from "../features/products/productSlice";
+
 function ProductCard({ product }) {
+  const dispatch = useDispatch();
   return (
     <div className="bg-white rounded-lg shadow p-4">
       <div className="h-40 bg-gray-100 rounded mb-3 overflow-hidden">
@@ -22,6 +26,13 @@ function ProductCard({ product }) {
         <span>₱{product.price}</span>
         <span>Stock: {product.stock}</span>
       </div>
+
+      <button
+        onClick={() => dispatch(selectProduct(product))}
+        className="mt-3 w-full border border-blue-600 text-blue-600 rounded py-1 hover:bg-blue-50"
+      >
+        Edit
+      </button>
     </div>
   );
 }

@@ -1,10 +1,17 @@
-import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { addProduct } from "../features/products/productSlice";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addProduct,
+  clearSelectedProduct,
+  updateProduct,
+} from "../features/products/productSlice";
 import ImageUpload from "../components/ImageUpload";
 
 function ProductForm() {
   const dispatch = useDispatch();
+  const selectedProduct = useSelector(
+    (state) => state.products.selectedProduct
+  );
 
   const [form, setForm] = useState({
     name: "",
@@ -14,8 +21,15 @@ function ProductForm() {
     image: "",
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
+  // Populat form in edit mode
+  useEffect(() => {
+    if (selectedProduct) {
+      setForm(selectedProduct);
+    }
+  }, [selectedProduct]);
+
+  const handleChange = ({ target }) => {
+    const { name, value } = target;
     setForm((prev) => ({
       ...prev,
       [name]: value,
@@ -34,17 +48,26 @@ function ProductForm() {
 
     if (!form.name || !form.price) return;
 
-    dispatch(
-      addProduct({
-        name: form.name,
-        price: Number(form.price),
-        stock: Number(form.stock),
-        category: form.category,
-        image: form.image,
-      })
-    );
+    if (form._id) {
+      dispatch(updateProduct(form));
+    } else {
+      dispatch(
+        addProduct({
+          name: form.name,
+          price: Number(form.price),
+          stock: Number(form.stock),
+          category: form.category,
+          image: form.image,
+        })
+      );
+    }
+    handleCancel();
+  };
 
+  const handleCancel = () => {
+    dispatch(clearSelectedProduct());
     setForm({
+      _id: null,
       name: "",
       price: "",
       stock: "",
@@ -52,9 +75,12 @@ function ProductForm() {
       image: "",
     });
   };
+
   return (
     <form onSubmit={handleSubmit} className="bg-white p-4 rounded-lg shadow">
-      <h2 className="text-lg font-semibold">Add Product</h2>
+      <h2 className="text-lg font-semibold">
+        {form._id ? "Edit Product" : "Add Product"}
+      </h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <input
@@ -93,12 +119,23 @@ function ProductForm() {
 
         <ImageUpload value={form.image} onChange={handleImageChange} />
 
-        <button
-          type="submit"
-          className="mt-4 bg-blue-600 text-whtie px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Save Product
-        </button>
+        <div className="flex gap-2 mt-4">
+          <button
+            type="submit"
+            className="mt-4 bg-blue-600 text-whtie px-4 py-2 rounded hover:bg-blue-700"
+          >
+            {form._id ? "Update" : "Save"}
+          </button>
+          {form._id && (
+            <button
+              type="button"
+              onClick={handleCancel}
+              className="border px-4 py-2 rounded"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );
