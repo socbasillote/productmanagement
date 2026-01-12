@@ -56,6 +56,12 @@ const productSlice = createSlice({
     clearSelectedProduct(state) {
       state.selectedProduct = null;
     },
+    setLoading(state, action) {
+      state.loading = action.payload;
+    },
+    setError(state, action) {
+      state.error = action.payload;
+    },
   },
 });
 
@@ -65,6 +71,8 @@ export const {
   deleteProduct,
   selectProduct,
   clearSelectedProduct,
+  setLoading,
+  setError,
 } = productSlice.actions;
 
 export default productSlice.reducer;
