@@ -7,7 +7,7 @@ import {
   setLoading,
   updateProduct,
 } from "../features/products/productSlice";
-import ImageUpload from "../components/ImageUpload";
+import ImageUpload from "./ImageUpload";
 
 function ProductForm() {
   const dispatch = useDispatch();
