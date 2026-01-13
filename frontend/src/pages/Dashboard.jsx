@@ -1,13 +1,21 @@
 import React from "react";
 
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+
 import ProductList from "../components/ProductList";
 import ProductForm from "../components/ProductForm";
+import { useEffect } from "react";
+import { fetchProducts } from "../features/products/productSlice";
 
 function Dashboard() {
+  const dispatch = useDispatch();
   const products = useSelector((state) => state.products.list);
 
   console.log(products);
+
+  useEffect(() => {
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   return (
     <div className="p-6 max-w-6xl mx-auto">

@@ -7,7 +7,13 @@
      4. Are we editing a product?
 */
 
-import { createSlice, nanoid } from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  fetchProductsAPI,
+  createProductAPI,
+  updateProductAPI,
+  deleteProductAPI,
+} from "./productAPI";
 
 const initialState = {
   list: [],
@@ -16,39 +22,59 @@ const initialState = {
   error: null,
 };
 
+// Async Thunks
+export const fetchProducts = createAsyncThunk(
+  "products/fetch",
+  async (_, thunkAPI) => {
+    try {
+      const res = await fetchProductsAPI();
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
+export const addProduct = createAsyncThunk(
+  "products/create",
+  async (product, thunkAPI) => {
+    try {
+      const res = await createProductAPI(product);
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
+export const updateProduct = createAsyncThunk(
+  "products/update",
+  async ({ id, product }, thunkAPI) => {
+    try {
+      const res = await updateProductAPI({ id, product });
+      return res.data;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
+export const deleteProduct = createAsyncThunk(
+  "products/delete",
+  async (id, thunkAPI) => {
+    try {
+      await deleteProductAPI(id);
+      return id;
+    } catch (err) {
+      return thunkAPI.rejectWithValue(err.message);
+    }
+  }
+);
+
 const productSlice = createSlice({
   name: "products",
   initialState,
   reducers: {
-    addProduct: {
-      reducer(state, action) {
-        state.list.push(action.payload);
-      },
-      prepare(product) {
-        return {
-          payload: {
-            ...product,
-            _id: nanoid(),
-            createdAt: new Date().toISOString(),
-          },
-        };
-      },
-    },
-
-    updateProduct(state, action) {
-      const index = state.list.findIndex(
-        (item) => item._id === action.payload._id
-      );
-      if (index !== -1) {
-        state.list[index] = action.payload;
-      }
-      state.selectedProduct = null;
-    },
-
-    deleteProduct(state, action) {
-      state.list = state.list.filter((item) => item._id !== action.payload);
-    },
-
     selectProduct(state, action) {
       state.selectedProduct = action.payload;
     },
@@ -63,16 +89,41 @@ const productSlice = createSlice({
       state.error = action.payload;
     },
   },
+  extraReducers: (builder) => {
+    builder
+      //fetch
+      .addCase(fetchProducts.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.loading = false;
+        state.list = action.payload;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
+
+      // CREATE
+      .addCase(addProduct.fulfilled, (state, action) => {
+        state.list.push(action.payload);
+      })
+
+      // UPDATE
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        const index = state.list.findIndex((p) => p._id === action.payload._id);
+        state.list[index] = action.payload;
+        state.selectedProduct = null;
+      })
+
+      // DELETE
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.list = state.list.filter((p) => p._id !== action.payload);
+      });
+  },
 });
 
-export const {
-  addProduct,
-  updateProduct,
-  deleteProduct,
-  selectProduct,
-  clearSelectedProduct,
-  setLoading,
-  setError,
-} = productSlice.actions;
+export const { selectProduct, clearSelectedProduct, setLoading, setError } =
+  productSlice.actions;
 
 export default productSlice.reducer;

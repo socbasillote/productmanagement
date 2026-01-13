@@ -59,19 +59,22 @@ function ProductForm() {
     dispatch(setError(null));
     dispatch(setLoading(true));
 
+    const formData = new FormData();
+    formData.append("name", form.name);
+    formData.append("price", Number(form.price));
+    formData.append("stock", Number(form.stock));
+    formData.append("category", form.category);
+
+    if (form.image instanceof File) {
+      formData.append("image", form.image);
+    }
+
     setTimeout(() => {
       if (form._id) {
-        dispatch(updateProduct(form));
+        formData.append("_id", form._id);
+        dispatch(updateProduct({ id: form._id, product: formData }));
       } else {
-        dispatch(
-          addProduct({
-            name: form.name,
-            price: Number(form.price),
-            stock: Number(form.stock),
-            category: form.category,
-            image: form.image,
-          })
-        );
+        dispatch(addProduct(formData));
       }
       dispatch(setLoading(false));
       handleCancel();

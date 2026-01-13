@@ -1,6 +1,9 @@
 import React from "react";
+import { useState, useEffect } from "react";
 
 function ImageUpload({ value, onChange }) {
+  const [preview, setPreview] = useState(null);
+
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -8,13 +11,26 @@ function ImageUpload({ value, onChange }) {
     // Basic validation
     if (!file.type.startsWith("image/")) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      onChange(reader.result);
-    };
-    reader.readAsDataURL(file);
+    onChange(file);
+
+    // Local preview only
+    const previewURL = URL.createObjectURL(file);
+    setPreview(previewURL);
   };
 
+  useEffect(() => {
+    if (typeof value === "string" && value) {
+      setPreview(value);
+    }
+  }, [value]);
+
+  useEffect(() => {
+    return () => {
+      if (preview?.startsWith("blobl:")) {
+        URL.revokeObjectURL(preview);
+      }
+    };
+  }, [preview]);
   return (
     <div className="mt-4">
       <input
