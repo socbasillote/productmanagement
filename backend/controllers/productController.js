@@ -2,16 +2,51 @@ import Product from "../models/Product.js";
 import mongoose from "mongoose";
 
 // GET
+
 export const getProducts = async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
+  const pageSize = 10;
+  const page = Number(req.query.page) || 1;
+
+  const keyword = req.query.keyword
+    ? { name: { $regex: req.query.keyword, $options: "i" } }
+    : {};
+
+  const categoryFilter = req.query.category
+    ? { category: req.query.category }
+    : {};
+
+  // 🔐 STRICT OWNERSHIP FILTER (NO ROLE EXCEPTIONS)
+  const ownerFilter = {
+    createdBy: req.user._id,
+  };
+
+  const filters = {
+    ...keyword,
+    ...categoryFilter,
+    ...ownerFilter,
+  };
+
+  const count = await Product.countDocuments(filters);
+
+  const products = await Product.find(filters)
+    .populate("createdBy", "name email role")
+    .limit(pageSize)
+    .skip(pageSize * (page - 1))
+    .sort({ createdAt: -1 });
+
+  res.json({
+    products,
+    page,
+    pages: Math.ceil(count / pageSize),
+  });
 };
 
 // CREATE
 export const createProduct = async (req, res) => {
   const productData = {
     ...req.body,
-    image: req.file?.path, // Cloudinary URL
+    image: req.file?.path,
+    createdBy: req.user._id, // Cloudinary URL
   };
 
   const product = new Product(productData);

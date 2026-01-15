@@ -16,7 +16,9 @@ import {
 } from "./productAPI";
 
 const initialState = {
-  list: [],
+  products: [],
+  page: 1,
+  pages: 1,
   selectedProduct: null,
   loading: false,
   error: null,
@@ -25,13 +27,8 @@ const initialState = {
 // Async Thunks
 export const fetchProducts = createAsyncThunk(
   "products/fetch",
-  async (_, thunkAPI) => {
-    try {
-      const res = await fetchProductsAPI();
-      return res.data;
-    } catch (err) {
-      return thunkAPI.rejectWithValue(err.message);
-    }
+  async (params) => {
+    return await fetchProductsAPI(params);
   }
 );
 
@@ -91,34 +88,34 @@ const productSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      //fetch
+      // Fetch product
       .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.list = action.payload;
-      })
-      .addCase(fetchProducts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
+        state.products = action.payload.products;
+        state.page = action.payload.page;
+        state.pages = action.payload.pages;
       })
 
       // CREATE
       .addCase(addProduct.fulfilled, (state, action) => {
-        state.list.push(action.payload);
+        state.products.push(action.payload);
       })
 
       // UPDATE
       .addCase(updateProduct.fulfilled, (state, action) => {
-        const index = state.list.findIndex((p) => p._id === action.payload._id);
-        state.list[index] = action.payload;
+        const index = state.products.findIndex(
+          (p) => p._id === action.payload._id
+        );
+        state.products[index] = action.payload;
         state.selectedProduct = null;
       })
 
       // DELETE
       .addCase(deleteProduct.fulfilled, (state, action) => {
-        state.list = state.list.filter((p) => p._id !== action.payload);
+        state.products = state.products.filter((p) => p._id !== action.payload);
       });
   },
 });

@@ -7,6 +7,14 @@ const productSchema = new mongoose.Schema(
     stock: { type: Number, default: 0 },
     category: { type: String },
     image: { type: String }, // base64 for now,
+
+    // Owner
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,
