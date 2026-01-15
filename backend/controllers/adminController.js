@@ -1,10 +1,10 @@
-import User from "../models/User";
+import User from "../models/User.js";
 
 export const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    const exits = await User.findOne({ email });
+    const exists = await User.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "User already exists" });
     }
@@ -32,7 +32,7 @@ export const getUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password");
 
-    req.json(users);
+    res.json(users);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }

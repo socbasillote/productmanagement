@@ -5,6 +5,8 @@ import Login from "./pages/auth/Login";
 import Register from "./pages/auth/Register";
 import HomePage from "./pages/HomePage";
 import ProtectedRoute from "./pages/auth/ProtectedRoute";
+import AdminDashboard from "./pages/AdminDashboard";
+import AdminUserProducts from "./pages/AdminUserProducts";
 
 function App() {
   return (
@@ -18,6 +20,24 @@ function App() {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/users/:userId/products"
+          element={
+            <ProtectedRoute>
+              <AdminUserProducts />
             </ProtectedRoute>
           }
         />
