@@ -1,13 +1,21 @@
 import Product from "../models/Product.js";
+import User from "../models/User.js";
 
 // Admin: Get products of specific user
 export const getUserProducts = async (req, res) => {
   try {
-    const userId = req.params.userId;
+    const user = await User.findOne({
+      _id: req.params.userId,
+      createdBy: req.user._id,
+    });
+
+    if (!user) {
+      return res.status(403).json({ message: "Access denied" });
+    }
 
     const products = await Product.find({
-      createdBy: userId,
-    }).populate("createdBy", "name email");
+      createdBy: user._id,
+    });
 
     res.json(products);
   } catch (error) {

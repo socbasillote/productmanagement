@@ -12,6 +12,7 @@ export default function Register() {
     name: "",
     email: "",
     password: "",
+    role: "admin",
   });
 
   const handleChange = (e) => {

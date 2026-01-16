@@ -14,6 +14,7 @@ export const createUser = async (req, res) => {
       email,
       password,
       role,
+      createdBy: role === "admin" ? null : req.user._id,
     });
 
     res.status(201).json({
@@ -30,7 +31,9 @@ export const createUser = async (req, res) => {
 // Get all users
 export const getUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password");
+    const users = await User.find({
+      createdBy: req.user._id,
+    }).select("-password");
 
     res.json(users);
   } catch (error) {

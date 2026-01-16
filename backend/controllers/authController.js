@@ -5,13 +5,24 @@ const generateToken = (id) =>
   jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, role } = req.body;
+
+  if (role !== "admin") {
+    return res.status(403).json({ message: "Only admins can create editors" });
+  }
 
   const userExists = await User.findOne({ email });
   if (userExists)
     return res.status(400).json({ message: "User already exists" });
 
-  const user = await User.create({ name, email, password });
+  const userData = {
+    name,
+    email,
+    password,
+    role: "admin",
+  };
+
+  const user = await User.create(userData);
   res.json({
     _id: user._id,
     name: user.name,
